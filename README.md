@@ -11,3 +11,7 @@ A Python script that spins up a simple web page with an upload form that you can
 ./quickupload.py -h
 ```
 
+
+## Knows issue
+
+It's so slow. I think it's Python related.
