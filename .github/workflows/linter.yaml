@@ -1,6 +1,8 @@
 name: Linters
 run-name: ${{ github.actor }} run linters workflow
-on: [push]
+on:
+  push:
+    branches-ignore: ["main"]
 jobs:
   Install-Depndencies:
     runs-on: ubuntu-latest
