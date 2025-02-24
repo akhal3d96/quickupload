@@ -55,6 +55,11 @@ HTML_TEMPLATE = """
         }
     </style>
     <script>
+        function readErrorMessage(errorMessage) {
+            err = JSON.parse(errorMessage)
+            return err.message
+        }
+
         function uploadFile() {
             const fileInput = document.getElementById('file');
             const file = fileInput.files[0];
@@ -92,16 +97,16 @@ HTML_TEMPLATE = """
                 }
             });
 
-            xhr.onerror = function() {
-                alert('Error occurred during file upload. Restarting page.');
+            xhr.onerror = (err) => {
+                alert(`Error occurred during file upload: ${readErrorMessage(err.currentTarget.response)}.`);
                 location.reload();
             };
 
-            xhr.onload = function() {
+            xhr.onload = (err) => {
                 if (xhr.status === 200) {
                     alert('File uploaded successfully!');
                 } else {
-                    alert('Error uploading file.');
+                    alert(`Error occurred during file upload: ${readErrorMessage(err.currentTarget.response)}.`);
                 }
                 location.reload();
             };
@@ -164,20 +169,17 @@ class UploaderHTTPHander(BaseHTTPRequestHandler):
                 while bytes_read < content_length:
                     chunk_size = min(64 * 1024, content_length - bytes_read)
                     chunk = self.rfile.read(chunk_size)
-
                     # if chunk == b'':
                     #     break
-
                     bytes_read += f.write(chunk)
 
-            self.send_response(200)  # Success
-            self.send_header("Content-type", "application/json")  # Send JSON response
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
             self.end_headers()
-            self.wfile.write(b'{"message": "File uploaded successfully!"}')
 
         except Exception as e:
             self.send_response(500)  # Internal Server Error
-            self.send_header("Content-type", "application/json")  # Send JSON response
+            self.send_header("Content-type", "application/json")
             self.end_headers()
             self.wfile.write(f'{{"message": "Error uploading file: {e}"}}'.encode())
 
